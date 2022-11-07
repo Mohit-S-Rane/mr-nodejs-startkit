@@ -31,7 +31,6 @@ export class UserValidators {
         "verification_token",
         "Correct Verification taken is required"
       ).isNumeric(),
-      body("email", "Email is required").isEmail(),
     ];
   }
 
