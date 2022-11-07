@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import User from "../models/User";
 import { Utils } from "./../utils/Utils";
 import { NodeMailer } from "./../utils/NodeMailer";
+import * as Bcrypt from 'bcrypt';
 
 export class UserController {
   static async signup(req, res, next) {
@@ -9,32 +10,33 @@ export class UserController {
     const password = req.body.password;
     const username = req.body.username;
     const verificationToken = Utils.generateVerificationToken();
-    // NodeMailer.sendEmail({
-    //         to: ["mohitsrane16@gmail.com"],
-    //         subject: "Email Verification",
-    //         html: `<h1>${verificationToken}</h1>`,
-    //       }).then(()=>{
-    //         res.send('success')
-    //       }).catch((e)=>{
-    //         next(e);
-    //       });
 
-    const data = {
-      email: email,
-      password: password,
-      username: username,
-      verification_token: verificationToken,
-      verification_token_time: Date.now() + new Utils().MAX_TOKEN_TIME,
-    };
+    
     try {
-      let user = await new User(data).save();
-      // Send verification email
-      res.send(user);
-      await NodeMailer.sendEmail({
-        to: ["mohitsrane16@gmail.com"],
-        subject: "Email Verification",
-        html: `<h1>${verificationToken}</h1>`,
-      });
+      Bcrypt.hash(password, 10, (async(err, hash)=>{
+        if(err){
+          next(err)
+          return;
+        }
+        const data = {
+          email: email,
+          password: hash,
+          username: username,
+          verification_token: verificationToken,
+          verification_token_time: Date.now() + new Utils().MAX_TOKEN_TIME,
+          created_at: new Date(),
+          updated_at: new Date()
+        };
+        let user = await new User(data).save();
+        // Send verification email
+        res.send(user);
+        await NodeMailer.sendEmail({
+          to: ["mohitsrane16@gmail.com"],
+          subject: "Email Verification",
+          html: `<h1>${verificationToken}</h1>`,
+        });
+      }))
+
     } catch (e) {
       next(e);
     }
@@ -91,5 +93,15 @@ export class UserController {
     } catch (e) {
       next(e);
     }
+  }
+
+  static async test(req,res,next){
+    const email = req.query.email;
+    const password = req.query.password;
+    User.findOne({email: email}).then((user: any)=>{
+      Bcrypt.compare(password, user.password, ((err, same)=>{
+        res.send(same);
+      }))
+    })
   }
 }
