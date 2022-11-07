@@ -124,16 +124,44 @@ export class UserController {
   static async updatePassword(req, res, next) {
     const user_id = req.user.user_id;
     const password = req.body.password;
-    const newPassword = req.body.new_password; 
+    const newPassword = req.body.new_password;
     try {
       User.findOne({ _id: user_id }).then(async (user: any) => {
         await Utils.comparePassword({
           plainPassword: password,
           encryptedPassword: user.password,
         });
-        const encryptedPassword =  await Utils.encryptPassword(newPassword);
-        const newUser = await User.findOneAndUpdate({_id: user_id}, {password: encryptedPassword}, {new: true})
-        res.send(newUser)
+        const encryptedPassword = await Utils.encryptPassword(newPassword);
+        const newUser = await User.findOneAndUpdate(
+          { _id: user_id },
+          { password: encryptedPassword },
+          { new: true }
+        );
+        res.send(newUser);
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async sendResetPasswordEmail(req, res, next) {
+    const email = req.query.email;
+    const resetPasswordToken = Utils.generateVerificationToken();
+    try {
+      const updateUser = await User.findOneAndUpdate(
+        { email: email },
+        {
+          updated_at: new Date(),
+          reset_password_token: resetPasswordToken,
+          reset_password_token_time: Date.now() + new Utils().MAX_TOKEN_TIME,
+        },
+        { new: true }
+      );
+      res.send(updateUser);
+      await NodeMailer.sendEmail({
+        to: [email],
+        subject: "Reset Password Email",
+        html: `<h1>${resetPasswordToken}</h1>`,
       });
     } catch (e) {
       next(e);

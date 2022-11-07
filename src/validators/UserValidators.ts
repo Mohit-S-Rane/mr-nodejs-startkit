@@ -72,4 +72,20 @@ export class UserValidators {
         }),
     ];
   }
+
+  static sendResetPasswordEmail() {
+    return [
+      query("email", 'Email is required')
+        .isEmail()
+        .custom((email)=>{
+          return User.findOne({email: email}).then((user)=>{
+            if(user){
+              return true;
+            } else {
+              throw new Error ('Email does not exist')
+            }
+          })
+        })
+    ];
+  }
 }
