@@ -4,15 +4,17 @@ import { Utils } from "./../utils/Utils";
 import { NodeMailer } from "./../utils/NodeMailer";
 import * as Bcrypt from "bcrypt";
 import * as Jwt from "jsonwebtoken";
+import { getEnvironmentVariable } from "../environment/env";
 
 export class UserController {
   static async signup(req, res, next) {
     const email = req.body.email;
     const username = req.body.username;
+    const password = req.body.username;
     const verificationToken = Utils.generateVerificationToken();
 
     try {
-      const hash = await UserController.encryptPassword(req, res, next);
+      const hash = await Utils.encryptPassword(password);
       const data = {
         email: email,
         password: hash,
@@ -33,18 +35,6 @@ export class UserController {
     } catch (e) {
       next(e);
     }
-  }
-
-  private static async encryptPassword(req, res, next) {
-    return new Promise((resolve, reject) => {
-      Bcrypt.hash(req.body.password, 10, (err, hash) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(hash);
-        }
-      });
-    });
   }
 
   static async verify(req, res, next) {
@@ -112,22 +102,22 @@ export class UserController {
 
   static async login(req, res, next) {
     const password = req.query.password;
-    Bcrypt.compare(password, req.user.password, (err, isValid) => {
-      if (err) {
-        next(new Error(err.message));
-      } else if (!isValid) {
-        next(new Error("Email & Password does not match"));
-      } else {
-        const data = {
-          user_id: req.user._id,
-          email: req.user.email,
-        };
-        const token = Jwt.sign(data, "secret", { expiresIn: "120d" });
-        res.json({
-          token: token,
-          user: req.user
-        })
-      }
-    });
+    const user = req.user;
+    try {
+      await Utils.comparePassword({
+        plainPassword: password,
+        encryptedPassword: user.password,
+      });
+      const token = Jwt.sign(
+        { email: user.email, user_id: user._id },
+        getEnvironmentVariable().jwt_secret,
+        { expiresIn: "120d" }
+      );
+      const data = { user: user, token: token };
+
+      res.json({ data });
+    } catch (e) {
+      next(e);
+    }
   }
 }
