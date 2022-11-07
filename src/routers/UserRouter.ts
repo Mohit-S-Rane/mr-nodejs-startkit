@@ -3,6 +3,7 @@ import { UserValidators } from './../validators/UserValidators';
 import { UserController } from './../controllers/UserController';
 import { GlobalMiddleware } from '../middlewares/GlobalMiddleware';
 
+
 class UserRouter{
     public router: Router;
 
@@ -14,7 +15,9 @@ class UserRouter{
         this.deleteRouter();
     }
 
-    getRouter(){}
+    getRouter(){
+        this.router.get('/send/verification/email', UserValidators.resendVerificationEmail(), GlobalMiddleware.checkError, UserController.resendVerificationEmail)
+    }
 
     postRouter(){
         this.router.post('/signup', UserValidators.signup(), GlobalMiddleware.checkError, UserController.signup);

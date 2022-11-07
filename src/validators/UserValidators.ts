@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import User from "../models/User";
 
 export class UserValidators {
@@ -7,11 +7,11 @@ export class UserValidators {
             console.log(req.body);
             return User.findOne({email: email}).then(user=>{
                 return true;
-                // if(user){
-                //     throw new Error('User Already Exist')
-                // } else{
-                //     return true;
-                // }
+                if(user){
+                    throw new Error('User Already Exist')
+                } else{
+                    return true;
+                }
             })
         }),
                body('password', 'Password is required').isAlphanumeric().isLength({min: 8, max: 20}).withMessage('password can be from 8-20 characters'),
@@ -21,5 +21,9 @@ export class UserValidators {
     static verifyUser() {
         return [body('verification_token', 'Correct Verification taken is required').isNumeric(),
                 body('email', 'Email is required').isEmail()]
+    }
+
+    static resendVerificationEmail() {
+        return [query('email').isEmail()]
     }
 }

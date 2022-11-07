@@ -9,35 +9,35 @@ export class UserController {
     const password = req.body.password;
     const username = req.body.username;
     const verificationToken = Utils.generateVerificationToken();
-    NodeMailer.sendEmail({
-            to: ["mohitsrane16@gmail.com"],
-            subject: "Email Verification",
-            html: `<h1>${verificationToken}</h1>`,
-          }).then(()=>{
-            res.send('success')
-          }).catch((e)=>{
-            next(e);
-          });
+    // NodeMailer.sendEmail({
+    //         to: ["mohitsrane16@gmail.com"],
+    //         subject: "Email Verification",
+    //         html: `<h1>${verificationToken}</h1>`,
+    //       }).then(()=>{
+    //         res.send('success')
+    //       }).catch((e)=>{
+    //         next(e);
+    //       });
 
-    // const data = {
-    //   email: email,
-    //   password: password,
-    //   username: username,
-    //   verification_token: verificationToken,
-    //   verification_time: Date.now() + new Utils().MAX_TOKEN_TIME,
-    // };
-    // try {
-    //   let user = await new User(data).save();
-    //   // Send verification email
-    //   res.send(user);
-    //   const mailer = await NodeMailer.sendEmail({
-    //     to: ["abc@gmail.com"],
-    //     subject: "Email Verification",
-    //     html: `<h1>${verificationToken}</h1>`,
-    //   });
-    // } catch (e) {
-    //   next(e);
-    // }
+    const data = {
+      email: email,
+      password: password,
+      username: username,
+      verification_token: verificationToken,
+      verification_token_time: Date.now() + new Utils().MAX_TOKEN_TIME,
+    };
+    try {
+      let user = await new User(data).save();
+      // Send verification email
+      res.send(user);
+      await NodeMailer.sendEmail({
+        to: ["mohitsrane16@gmail.com"],
+        subject: "Email Verification",
+        html: `<h1>${verificationToken}</h1>`,
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 
   static async verify(req, res, next) {
@@ -59,6 +59,34 @@ export class UserController {
         throw new Error(
           "Verification Token is Expired. Please Request for New One."
         );
+      }
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async resendVerificationEmail(req, res, next) {
+    const email = req.query.email;
+    const verificationToken = Utils.generateVerificationToken();
+    try {
+      const user: any = await User.findOneAndUpdate(
+        { email: email },
+        {
+          verification_token: verificationToken,
+          verification_token_time: Date.now() + new Utils().MAX_TOKEN_TIME,
+        }
+      );
+      if (user) {
+        const mailer = await NodeMailer.sendEmail({
+          to: [user.email],
+          subject: "Email Verification",
+          html: `<h1>${verificationToken}</h1>`,
+        });
+        res.json({
+          success: true,
+        });
+      } else {
+        throw Error("User does not Exist");
       }
     } catch (e) {
       next(e);
