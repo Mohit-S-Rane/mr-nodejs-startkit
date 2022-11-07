@@ -55,4 +55,21 @@ export class UserValidators {
       query("password", "Valid Password is required").isAlphanumeric(),
     ];
   }
+
+  static updatePassword() {
+    return [
+      body("password", "Password is required").isAlphanumeric(),
+      body("confirm_password", "Confirm Password is required").isAlphanumeric(),
+      body("new_password", "New Password is required")
+        .isAlphanumeric()
+        .custom((newPassword, { req }) => {
+          if (newPassword === req.body.confirm_password) {
+            return true;
+          } else {
+            req.errorStatus = 422;
+            throw new Error("Password and Confirm Password Does Not Match");
+          }
+        }),
+    ];
+  }
 }
