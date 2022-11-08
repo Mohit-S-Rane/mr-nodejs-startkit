@@ -75,17 +75,77 @@ export class UserValidators {
 
   static sendResetPasswordEmail() {
     return [
-      query("email", 'Email is required')
+      query("email", "Email is required")
         .isEmail()
-        .custom((email)=>{
-          return User.findOne({email: email}).then((user)=>{
-            if(user){
+        .custom((email) => {
+          return User.findOne({ email: email }).then((user) => {
+            if (user) {
               return true;
             } else {
-              throw new Error ('Email does not exist')
+              throw new Error("Email does not exist");
             }
-          })
-        })
+          });
+        }),
+    ];
+  }
+
+  static verifyResetPasswordToken() {
+    return [
+      query("reset_password_token", "Reset password token is required")
+        .isNumeric()
+        .custom((token, { req }) => {
+          return User.findOne({
+            reset_password_token: token,
+            reset_password_token_time: { $gt: Date.now() },
+          }).then((user) => {
+            if (user) {
+              return true;
+            } else {
+              throw new Error(
+                "Token does not exist. Please request for a new one"
+              );
+            }
+          });
+        }),
+    ];
+  }
+
+  static resetPassword() {
+    return [
+      body("email", "Email is required")
+        .isEmail()
+        .custom((email, { req }) => {
+          return User.findOne({ email: email }).then((user) => {
+            if (user) {
+              req.user = user;
+              return true;
+            } else {
+              throw new Error("User does not Exist");
+            }
+          });
+        }),
+      body("new_password", "New Password is required")
+        .isAlphanumeric()
+        .custom((newPassword, { req }) => {
+          if (newPassword === req.body.confirm_password) {
+            return true;
+          } else {
+            throw new Error("confirm password and new password does not match");
+          }
+        }),
+      body("confirm_password", "Confirm Password is required").isAlphanumeric(),
+      body("reset_password_token", "Reset Password Token is required")
+        .isNumeric()
+        .custom((token, { req }) => {
+          if (Number(req.user.reset_password_token) === Number(token)) {
+            return true;
+          } else {
+            req.errorStatus = 422;
+            throw new Error(
+              "Reset password token is invalid. Please try again"
+            );
+          }
+        }),
     ];
   }
 }

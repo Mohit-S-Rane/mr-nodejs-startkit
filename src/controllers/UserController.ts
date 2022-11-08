@@ -167,4 +167,26 @@ export class UserController {
       next(e);
     }
   }
+
+  static verifyResetPasswordToken(req, res, next) {
+    res.json({
+      success: true,
+    });
+  }
+
+  static async resetPassword(req, res, next) {
+    const user = req.user;
+    const newPassword = req.body.new_password;
+    try {
+      const encryptedPassword = await Utils.encryptPassword(newPassword);
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id },
+        { updated_at: new Date(), password: encryptedPassword },
+        { new: true }
+      );
+      res.send(updatedUser);
+    } catch (e) {
+      next(e);
+    }
+  }
 }
