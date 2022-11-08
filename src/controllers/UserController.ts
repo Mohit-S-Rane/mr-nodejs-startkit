@@ -189,4 +189,18 @@ export class UserController {
       next(e);
     }
   }
+
+  static async updateProfilePic(req, res, next) {
+    const userId = req.user.user_id;
+    const fileUrl = 'http://localhost:6000/' + req.file.path;
+    try {
+        const user = await User.findOneAndUpdate({_id: userId}, {
+            updated_at: new Date(),
+            profile_pic_url: fileUrl
+        }, {new: true});
+        res.send(user);
+    } catch (e) {
+        next(e);
+    }
+}
 }

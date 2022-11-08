@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserValidators } from './../validators/UserValidators';
 import { UserController } from './../controllers/UserController';
 import { GlobalMiddleware } from '../middlewares/GlobalMiddleware';
+import { Utils } from './../utils/Utils';
 
 
 class UserRouter{
@@ -32,6 +33,7 @@ class UserRouter{
         this.router.patch('/verify', UserValidators.verifyUser(), GlobalMiddleware.checkError, GlobalMiddleware.authenticate, UserController.verify),
         this.router.patch('/update/password', UserValidators.updatePassword(), GlobalMiddleware.checkError, GlobalMiddleware.authenticate, UserController.updatePassword)
         this.router.patch('/reset/password', UserValidators.resetPassword(), GlobalMiddleware.checkError, UserController.resetPassword)
+        this.router.patch('/update/profilePic', GlobalMiddleware.authenticate, new Utils().multer.single('profile_pic'), UserValidators.updateProfilePic(), GlobalMiddleware.checkError, UserController.updateProfilePic)
     }
 
     deleteRouter(){}

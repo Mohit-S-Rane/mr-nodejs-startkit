@@ -148,4 +148,14 @@ export class UserValidators {
         }),
     ];
   }
+
+  static updateProfilePic() {
+    return [body('profile_pic').custom((profilePic, {req}) => {
+        if (req.file) {
+            return true;
+        } else {
+            throw new Error('File not Uploaded');
+        }
+    })]
+  }
 }
