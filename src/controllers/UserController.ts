@@ -126,19 +126,18 @@ export class UserController {
     const password = req.body.password;
     const newPassword = req.body.new_password;
     try {
-      User.findOne({ _id: user_id }).then(async (user: any) => {
-        await Utils.comparePassword({
-          plainPassword: password,
-          encryptedPassword: user.password,
-        });
-        const encryptedPassword = await Utils.encryptPassword(newPassword);
-        const newUser = await User.findOneAndUpdate(
-          { _id: user_id },
-          { password: encryptedPassword },
-          { new: true }
-        );
-        res.send(newUser);
+      const user: any = await User.findOne({ _id: user_id });
+      await Utils.comparePassword({
+        plainPassword: password,
+        encryptedPassword: user.password,
       });
+      const encryptedPassword = await Utils.encryptPassword(newPassword);
+      const newUser = await User.findOneAndUpdate(
+        { _id: user_id },
+        { password: encryptedPassword },
+        { new: true }
+      );
+      res.send(newUser);
     } catch (e) {
       next(e);
     }
@@ -192,15 +191,19 @@ export class UserController {
 
   static async updateProfilePic(req, res, next) {
     const userId = req.user.user_id;
-    const fileUrl = 'http://localhost:6000/' + req.file.path;
+    const fileUrl = "http://localhost:6000/" + req.file.path;
     try {
-        const user = await User.findOneAndUpdate({_id: userId}, {
-            updated_at: new Date(),
-            profile_pic_url: fileUrl
-        }, {new: true});
-        res.send(user);
+      const user = await User.findOneAndUpdate(
+        { _id: userId },
+        {
+          updated_at: new Date(),
+          profile_pic_url: fileUrl,
+        },
+        { new: true }
+      );
+      res.send(user);
     } catch (e) {
-        next(e);
+      next(e);
     }
-}
+  }
 }
