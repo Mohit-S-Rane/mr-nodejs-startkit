@@ -16,7 +16,9 @@ class PostRouter{
         this.deleteRouter();
     }
 
-    getRouter(){}
+    getRouter(){
+        this.router.get('/me', GlobalMiddleware.authenticate, PostController.getPostByUser)
+    }
 
     postRouter(){
         this.router.post('/add', GlobalMiddleware.authenticate, PostValidators.addPost(), GlobalMiddleware.checkError, PostController.addPost)
