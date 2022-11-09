@@ -6,7 +6,10 @@ const postSchema = new mongoose.Schema({
   created_at: { type: Date, required: true },
   updated_at: { type: Date, required: true },
   content: { type: String, required: true },
-  comments: [{type: mongoose.Types.ObjectId, ref: 'comments'}]
+  comments: [{ type: mongoose.Types.ObjectId, ref: "comments" }],
 });
 
+postSchema.virtual("commentCount").get(function () {
+  return this.comments.length;
+});
 export default model("posts", postSchema);

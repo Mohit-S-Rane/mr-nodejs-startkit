@@ -43,7 +43,7 @@ export class PostController {
       if (page > totalPages) {
         throw new Error("No More Post To Show");
       }
-      const posts = await Post.find({ user_id: userId }, { __v: 0, user_id: 0 })
+      const posts: any = await Post.find({ user_id: userId }, { __v: 0, user_id: 0 })
         .populate("comments")
         .skip(perPage * page - perPage)
         .limit(perPage);
@@ -54,6 +54,7 @@ export class PostController {
         totalpages: totalPages,
         currentPage: currentPage,
         prevPage: prevPage,
+        count: posts[0].commentCount
       });
     } catch (e) {
       next(e);
