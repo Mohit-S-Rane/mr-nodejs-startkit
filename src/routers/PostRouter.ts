@@ -19,6 +19,7 @@ class PostRouter{
     getRouter(){
         this.router.get('/me', GlobalMiddleware.authenticate, PostController.getPostByUser)
         this.router.get('/all', GlobalMiddleware.authenticate, PostController.getAllPosts)
+        this.router.get('/:id', GlobalMiddleware.authenticate, PostValidators.getPostById(), GlobalMiddleware.checkError, PostController.getPostById)
     }
 
     postRouter(){
