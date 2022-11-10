@@ -121,5 +121,15 @@ export class PostController {
     } catch (e) {
         next(e);
     }
-}
+  }
+
+  static async deletePost(req,res,next){
+    const post = req.post;
+    try {
+      await post.remove();
+      res.send(post);
+    } catch (e) {
+      next(e)
+    }
+  }
 }

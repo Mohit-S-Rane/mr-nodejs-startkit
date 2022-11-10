@@ -30,7 +30,9 @@ class PostRouter{
         this.router.patch('/edit/:id', GlobalMiddleware.authenticate, PostValidators.editPost(), GlobalMiddleware.checkError, PostController.editPost)
     }
 
-    deleteRouter(){}
+    deleteRouter(){
+        this.router.delete('/delete/:id', GlobalMiddleware.authenticate, PostValidators.deletePost(), GlobalMiddleware.checkError, PostController.deletePost)
+    }
 }
 
 export default new PostRouter().router;
