@@ -22,4 +22,8 @@ export class PostValidators {
       }),
     ];
   }
+
+  static editPost(){
+    return [body('content', 'Content is required').isString()]
+  }
 }

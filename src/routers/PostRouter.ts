@@ -26,7 +26,9 @@ class PostRouter{
         this.router.post('/add', GlobalMiddleware.authenticate, PostValidators.addPost(), GlobalMiddleware.checkError, PostController.addPost)
     }
 
-    patchRouter(){}
+    patchRouter(){
+        this.router.patch('/edit/:id', GlobalMiddleware.authenticate, PostValidators.editPost(), GlobalMiddleware.checkError, PostController.editPost)
+    }
 
     deleteRouter(){}
 }

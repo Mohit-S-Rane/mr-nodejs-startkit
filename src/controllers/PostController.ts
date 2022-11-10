@@ -95,7 +95,7 @@ export class PostController {
       });
     } catch (e) {
       next(e);
-    } 
+    }
   }
 
   static async getPostById(req, res, next) {
@@ -104,4 +104,22 @@ export class PostController {
       commentCount: req.post.commentCount,
     });
   }
+
+  static async editPost(req, res, next) {
+    const content = req.body.content;
+    const postId = req.params.id;
+    try {
+        const updatedPost = await Post.findOneAndUpdate({_id: postId}, {
+            content: content,
+            updated_at: new Date()
+        }, {new: true}).populate('comments');
+        if (updatedPost) {
+            res.send(updatedPost);
+        } else {
+            throw new Error('Post Does Not Exist');
+        }
+    } catch (e) {
+        next(e);
+    }
+}
 }

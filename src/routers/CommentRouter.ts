@@ -21,7 +21,9 @@ class CommentRouter {
         this.router.post('/add/:id', GlobalMiddleware.authenticate, CommentValidators.addComment(), GlobalMiddleware.checkError, CommentController.addComment)
     }
 
-    patchRouter(){}
+    patchRouter(){
+        this.router.patch('/edit/:id', GlobalMiddleware.authenticate, CommentValidators.editComment(), GlobalMiddleware.checkError, CommentController.editComment)
+    }
 
     deleteRouter(){}
 }
