@@ -5,6 +5,7 @@ import UserRouter from './routers/UserRouter';
 import PostRouter from './routers/PostRouter';
 import CommentRouter from './routers/CommentRouter';
 import bodyParser = require('body-parser');
+import { Jobs } from './jobs/Jobs';
 
 export class Server{
     public app:express.Application = express();
@@ -19,6 +20,7 @@ export class Server{
     setConfiguration(){
         this.connectMongoDb();
         this.configureBodyParser();
+        Jobs.runRequiredJobs();
     }
 
     connectMongoDb(){
