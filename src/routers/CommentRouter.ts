@@ -25,7 +25,9 @@ class CommentRouter {
         this.router.patch('/edit/:id', GlobalMiddleware.authenticate, CommentValidators.editComment(), GlobalMiddleware.checkError, CommentController.editComment)
     }
 
-    deleteRouter(){}
+    deleteRouter(){
+        this.router.delete('/delete/:id', GlobalMiddleware.authenticate, CommentValidators.deleteComment(), GlobalMiddleware.checkError, CommentController.deleteComment)
+    }
 }
 
 export default new CommentRouter().router;
