@@ -22,7 +22,7 @@ class UserRouter{
         this.router.get('/login', UserValidators.login(), GlobalMiddleware.checkError, UserController.login)
         this.router.get('/reset/password', UserValidators.sendResetPasswordEmail(), GlobalMiddleware.checkError, UserController.sendResetPasswordEmail)
         this.router.get('/verify/resetPasswordToken', UserValidators.verifyResetPasswordToken(), GlobalMiddleware.checkError, UserController.verifyResetPasswordToken)
-        // this.router.get('/test', UserController.test)
+        this.router.get('/test', UserController.test)
     }
 
     postRouter(){

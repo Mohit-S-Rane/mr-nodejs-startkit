@@ -5,6 +5,9 @@ import { NodeMailer } from "./../utils/NodeMailer";
 import * as Bcrypt from "bcrypt";
 import * as Jwt from "jsonwebtoken";
 import { getEnvironmentVariable } from "../environment/env";
+import * as Cheerio from 'cheerio';
+import * as Request from 'request';
+import { response } from "express";
 
 export class UserController {
   static async signup(req, res, next) {
@@ -88,16 +91,6 @@ export class UserController {
     } catch (e) {
       next(e);
     }
-  }
-
-  static async test(req, res, next) {
-    const email = req.query.email;
-    const password = req.query.password;
-    User.findOne({ email: email }).then((user: any) => {
-      Bcrypt.compare(password, user.password, (err, same) => {
-        res.send(same);
-      });
-    });
   }
 
   static async login(req, res, next) {
@@ -205,5 +198,13 @@ export class UserController {
     } catch (e) {
       next(e);
     }
+  }
+
+  static async test(req, res, next) {
+    Request('https://webscraper.io/test-sites/e-commerce/allinone', ((error, response, html)=>{
+      if(!error && response.statusCode === 200){
+        const $ = Cheerio.load(html);
+      }
+    }))
   }
 }
